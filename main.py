@@ -5,7 +5,7 @@ port = sys.argv[1]
 
 
 def main():
-    newirc = Irc('SmellyIRC', '0.0.0.0', int(port))
+    newirc = Irc('SmellyIRC', '', int(port))
     newirc.run()
 
 main()

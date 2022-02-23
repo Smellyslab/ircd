@@ -5,7 +5,7 @@ import threading
 import rsa 
 import rsa
 from base64 import b64encode, b64decode
-
+import json
 
 
 
@@ -19,7 +19,7 @@ class Client():
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
     def receive():
-        self.s.connect((self.rhost, self.rport))
+        
         while True:
             try:
                 data = self.s.recv(1024)
@@ -30,12 +30,20 @@ class Client():
                 break
 
     def run(self):
-        thread = threading.Thread(target=self.receive)
-        while True:
-            inp = input('>>')
-            message = {"message": inp, "public_key": self.public, "signature": b64encode(rsa.sign(inp.encode('utf-8'), self.private, "SHA-512"))}
         try:
-            s.send(message.encode('utf-8'))
+            self.s.connect((self.rhost, self.rport))
+        except Exception as e:
+            print(e)
+        thread = threading.Thread(target=self.receive)
+        try:
+            while True:
+                inp = input('>>')
+                if inp:
+                    try:
+                        message = {"message": inp, "public_key": str(self.public).encode(), "signature": b64encode(rsa.sign(inp.encode('utf-8'), self.private, "SHA-512"))}
+                        self.s.send(bytes(str(message), 'utf-8'))
+                    except Exception as e:
+                        print(e)
         except Exception as e:
             print(e)
         

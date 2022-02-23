@@ -26,8 +26,12 @@ class Irc():
         while True:
             print(conn)
             message = conn.recv(1024)
-            json_data = message.decode('utf-8')
-            print(f'New message: {message.decode()}')
+            json_data = message.decode()
+            #print(json_data)
+            json_data = json.dumps(json_data)
+            print(type(json_data))
+            #print(f'New message: {json_data}')
+            #print(f'\033[01;36m{json_data["message"]}\033[00m')
             if "message" not in json_data:
                 print('Missing Message VAR')
                 return 
@@ -38,7 +42,7 @@ class Irc():
                 print("Missing PUBLIC_KEY VAR")
                 return 
             else:
-                message = f'{hashlib.sha1(json_data["public_key"].decode("utf-8"))}: {json_data["message"]}'
+                message = f'{hashlib.sha1(json_data["public_key"].encode("utf-8"))}: {json_data["message"]}'
                 if rsa.verify(json_data["message"], b64decode(json_data["signature"]), json_data["public_key"]) == True:
                     self.brodcast(message.encode('utf-8'))
                 else:
@@ -46,14 +50,15 @@ class Irc():
 
 
     def run(self):
-        print(f'\033[01;32m[LOG]: STARTING SERVER ON {self.host}:{self.port}, IRC NAME: {self.name}\033[00m')
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #rsa.verify(msg2, b64decode(signature), public)
         s.bind((self.host,self.port))
         s.listen()
+        print(f'\033[01;32m[LOG]: STARTING SERVER ON {self.host}:{self.port}, IRC NAME: {self.name}\033[00m')
+        #conn = s.accept()
         while True:
-            conn, cli_addr = s.accept()
-            #print(f'New Connection: {conn}')
+            conn = s.accept()[0]
+            print(f'New Connection: {conn}')
             self.clients.append(conn)
             print(self.clients)
             thread = threading.Thread(target=self.recvclient, args=(conn,))
